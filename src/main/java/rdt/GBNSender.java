@@ -65,6 +65,7 @@ public class GBNSender implements Sender
         // 此时应当重启计时器
         if(base == nextSeqNum)
         {
+            stopTimer();
             startTimer();
         }
         nextSeqNum++;
@@ -75,6 +76,10 @@ public class GBNSender implements Sender
     {
         int seqNum = new GBN().getSeqnum(ack);
         System.out.println("====ACK:"+seqNum+"====");
+        if(seqNum == totalPkts)
+        {
+            System.out.println("====收到所有ACK,文件传输完成====");
+        }
         base = seqNum + 1;
         if(nextSeqNum == base)
         {
@@ -124,8 +129,9 @@ public class GBNSender implements Sender
 
     private void startTimer()
     {
-        timer = new Timer();
-        timer.schedule(new GBNTimerTask(this),TIMEOUT);
+        Timer t = new Timer();
+        t.schedule(new GBNTimerTask(this),TIMEOUT);
+        timer = t;
     }
 
     private void stopTimer()
