@@ -26,4 +26,5 @@ public interface Sender
      * @return 是否已满
      */
     boolean isFull();
+
 }

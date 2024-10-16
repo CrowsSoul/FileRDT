@@ -34,8 +34,8 @@ public class CS02 {
             receiver = rdt.createReceiver(socket);
 
             // 启动客户端和服务端线程
-            Thread clientThread = new Thread(new FileClient(br,sender,rdt));
-            Thread serverThread = new Thread(new FileServer(rdt,sender,receiver,socket));
+            Thread clientThread = new Thread(new FileClient(br,sender,rdt,"src/main/resources/CS02/"));
+            Thread serverThread = new Thread(new FileServer(rdt,sender,receiver,socket,"src/main/resources/CS02/"));
             clientThread.start();
             serverThread.start();
 

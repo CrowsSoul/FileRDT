@@ -1,11 +1,23 @@
 package rdt;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
 
 public class GBNSender implements Sender
 {
     private final DatagramSocket socket;
+    private String fileName;
+    private int totalPkts;
+    private final int windowSize = 5; // 窗口大小
+    private int base;
+    private int nextSeqNum;
+    private Timer timer;
+    private final int TIMEOUT = 500; // 超时时间为0.5s
+    private final List<byte[]> dataList = new ArrayList<>();
 
     public GBNSender(DatagramSocket socket)
     {
@@ -15,24 +27,96 @@ public class GBNSender implements Sender
     @Override
     public void sendFile(String fileName, int pktNum)
     {
+        this.fileName = fileName;
+        this.totalPkts = pktNum;
+        this.base = 0;
+        this.nextSeqNum = 0;
 
+        String message = "-createFile "+fileName+" "+pktNum;
+        byte[] buffer = message.getBytes();
+        try
+        {
+            socket.send(new DatagramPacket(buffer, buffer.length));
+        } catch (IOException e)
+        {
+            System.out.println("====创建文件请求发送失败====");
+        }
     }
 
     @Override
     public void sendData(byte[] data)
     {
-
+        // 首先需要存储并发送数据
+        dataList.add(data);
+        try
+        {
+            socket.send(new DatagramPacket(data,data.length));
+        } catch (IOException e)
+        {
+            System.err.println("====数据发送失败====");
+        }
+        // 要么是开始时，要么是所有发送的数据都被确认了
+        // 此时应当重启计时器
+        if(base == nextSeqNum)
+        {
+            startTimer();
+        }
+        nextSeqNum++;
     }
 
     @Override
     public void receiveACK(byte[] ack)
     {
-
+         base = new GBN().getSeqnum(ack) + 1;
+         if(nextSeqNum == base)
+         {
+             // 当发送的数据全部接收时，停止计时器
+             stopTimer();
+         }
+         else
+         {
+             // 否则一旦有数据被确认，就重启计时器
+             startTimer();
+         }
     }
 
     @Override
     public boolean isFull()
     {
-        return false;
+        return (nextSeqNum-base)==windowSize;
+    }
+
+    /**
+     * 超时重传
+     */
+    public void reSend()
+    {
+        // 重传所有未被确认的数据
+        for(int i=base;i<nextSeqNum;i++)
+        {
+            byte[] data = dataList.get(i);
+            try
+            {
+                socket.send(new DatagramPacket(data,data.length));
+            } catch (IOException e)
+            {
+                System.err.println("====数据发送失败====");
+            }
+        }
+    }
+
+    private void startTimer()
+    {
+        timer = new Timer();
+        timer.schedule(new GBNTimerTask(this),TIMEOUT);
+    }
+
+    private void stopTimer()
+    {
+        if(timer!= null)
+        {
+            timer.cancel();
+        }
+        timer = null;
     }
 }

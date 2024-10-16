@@ -22,9 +22,10 @@ public interface RDT
      * 将序号与数据组合成完整的包
      * @param data 数据
      * @param seqnum 序号
+     * @param bytesRead 已读取的字节数
      * @return 完整的包
      */
-    byte[] addSeqnum(byte[] data,int seqnum);
+    byte[] addSeqnum(byte[] data,int seqnum,int bytesRead);
 
     /**
      * 创建发送端的工厂方法
