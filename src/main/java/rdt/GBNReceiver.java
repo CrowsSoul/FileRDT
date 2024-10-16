@@ -34,9 +34,11 @@ public class GBNReceiver implements Receiver
         {
             sendACK(seqNum);
             expectedSeqNum++;
+            System.out.println("====确认接收数据包:"+seqNum+"====");
         }
         else
         {
+            System.out.println("====收到重传数据包:"+seqNum+"====");
             sendACK(expectedSeqNum-1);
         }
     }

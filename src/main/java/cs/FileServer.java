@@ -69,11 +69,11 @@ public class FileServer implements Runnable
                 }
                 else
                 {
-                    System.out.println("====收到数据包: " + rdt.getSeqnum(actualPkt)+"====");
+                    int seqNum = rdt.getSeqnum(actualPkt);
                     // 若是数据，则交给Receiver处理
                     receiver.receiveData(actualPkt);
                     // 需要在List中添加
-                    fileData.add(rdt.getData(actualPkt));
+                    fileData.set(seqNum, rdt.getData(actualPkt));
                     if(rdt.getSeqnum(actualPkt) == totalPkts)
                     {
                         // 若是最后一组数据,则应将所有数据写入文件
@@ -93,6 +93,10 @@ public class FileServer implements Runnable
     {
         this.totalPkts = pktNum;
         String filePath = fileDir + filename;
+        for (int i = 0; i <= pktNum; i++)
+        {
+            fileData.add(new byte[1024]); // 初始化fileData列表
+        }
         // 创建文件对象
         File file = new File(filePath);
         try {
@@ -100,7 +104,7 @@ public class FileServer implements Runnable
             if (file.createNewFile())
             {
                 System.out.println("====文件已创建: " + filePath + "====");
-                System.out.println("====需要接收数据包的个数: " + pktNum+1 + "====");
+                System.out.println("====需要接收数据包的个数: " + (pktNum+1) + "====");
             } else
             {
                 System.out.println("====文件已存在: " + filePath +"====");

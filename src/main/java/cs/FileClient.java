@@ -83,7 +83,6 @@ public class FileClient implements Runnable
                 // 将生成的packet添加到列表中
                 pkts.add(packet);
                 System.out.println("==== 已生成数据包:"+seqNum+"====");
-                System.out.println(new String(packet));
 
                 // 增加序号
                 seqNum++;

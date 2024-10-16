@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Timer;
 
 public class GBNSender implements Sender
@@ -16,8 +17,9 @@ public class GBNSender implements Sender
     private int base;
     private int nextSeqNum;
     private Timer timer;
-    private final int TIMEOUT = 500; // 超时时间为0.5s
+    private final int TIMEOUT = 100; // 超时时间为0.1s
     private final List<byte[]> dataList = new ArrayList<>();
+    private final Random random = new Random();
 
     public GBNSender(DatagramSocket socket)
     {
@@ -48,12 +50,16 @@ public class GBNSender implements Sender
     {
         // 首先需要存储并发送数据
         dataList.add(data);
-        try
-        {
-            socket.send(new DatagramPacket(data,data.length));
-        } catch (IOException e)
-        {
-            System.err.println("====数据发送失败====");
+        // 生成一个随机数，模拟丢包
+        if (random.nextDouble() >= 0.2) { // 80%的概率发送
+            try {
+                socket.send(new DatagramPacket(data, data.length));
+                System.out.println("====数据包:"+nextSeqNum+"已发送====");
+            } catch (IOException e) {
+                System.err.println("====数据发送失败====");
+            }
+        } else {
+            System.err.println("****丢包:"+nextSeqNum+"****");
         }
         // 要么是开始时，要么是所有发送的数据都被确认了
         // 此时应当重启计时器
@@ -67,17 +73,20 @@ public class GBNSender implements Sender
     @Override
     public void receiveACK(byte[] ack)
     {
-         base = new GBN().getSeqnum(ack) + 1;
-         if(nextSeqNum == base)
-         {
-             // 当发送的数据全部接收时，停止计时器
-             stopTimer();
-         }
-         else
-         {
-             // 否则一旦有数据被确认，就重启计时器
-             startTimer();
-         }
+        int seqNum = new GBN().getSeqnum(ack);
+        System.out.println("====ACK:"+seqNum+"====");
+        base = seqNum + 1;
+        if(nextSeqNum == base)
+        {
+         // 当发送的数据全部接收时，停止计时器
+         stopTimer();
+        }
+        else
+        {
+         // 否则一旦有数据被确认，就重启计时器
+         stopTimer();
+         startTimer();
+        }
     }
 
     @Override
@@ -91,6 +100,14 @@ public class GBNSender implements Sender
      */
     public void reSend()
     {
+        if(base == (totalPkts+1))
+        {
+            // 全部数据都已被确认，停止重传
+            stopTimer();
+            return;
+        }
+
+        System.err.println("****超时重传"+base+"到"+(nextSeqNum-1)+"****");
         // 重传所有未被确认的数据
         for(int i=base;i<nextSeqNum;i++)
         {
