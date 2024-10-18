@@ -2,10 +2,7 @@ package com.crows;
 
 import cs.FileClient;
 import cs.FileServer;
-import rdt.GBN;
-import rdt.RDT;
-import rdt.Receiver;
-import rdt.Sender;
+import rdt.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,7 +26,7 @@ public class CS01 {
             // 设置目的地址
             ds.connect(InetAddress.getByName("localhost"), TARGET_PORT);
             socket = ds;
-            rdt = new GBN();
+            rdt = new SR();
             sender = rdt.createSender(socket);
             receiver = rdt.createReceiver(socket);
 

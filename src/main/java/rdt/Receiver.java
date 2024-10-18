@@ -20,4 +20,10 @@ public interface Receiver
      * @param seqNum 序号
      */
     void sendACK(int seqNum);
+
+    /**
+     * 判断是否接收完毕
+     * @return true表示接收完毕，false表示未接收完毕
+     */
+    boolean isFinished();
 }

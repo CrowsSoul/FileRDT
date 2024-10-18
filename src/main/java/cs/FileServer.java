@@ -19,7 +19,7 @@ public class FileServer implements Runnable
     private final Sender sender;
     private final Receiver receiver;
     private final DatagramSocket socket;
-    private final List<byte[]> fileData = new ArrayList<>(); // 文件数据
+    private List<byte[]> fileData; // 文件数据
     private int totalPkts = 0; // 分组数
     private String filename = ""; // 文件名
     private final String fileDir;
@@ -74,10 +74,9 @@ public class FileServer implements Runnable
                     receiver.receiveData(actualPkt);
                     // 需要在List中添加
                     fileData.set(seqNum, rdt.getData(actualPkt));
-                    if(rdt.getSeqnum(actualPkt) == totalPkts)
+                    if(fileData.get(totalPkts).length > 0 && receiver.isFinished())
                     {
-                        // 若是最后一组数据,则应将所有数据写入文件
-                        System.out.println("====文件:"+filename+"接收完成====");
+                        // 若最后一组数据收到且全部接收,则应将所有数据写入文件
                         writeFile();
                     }
                 }
@@ -91,6 +90,7 @@ public class FileServer implements Runnable
     // 用于创建文件且存储基本信息。还要初始化Receiver
     private void createFile(String filename,int pktNum)
     {
+        this.fileData = new ArrayList<>();
         this.totalPkts = pktNum;
         String filePath = fileDir + filename;
         for (int i = 0; i <= pktNum; i++)

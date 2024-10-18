@@ -82,11 +82,11 @@ public class FileClient implements Runnable
 
                 // 将生成的packet添加到列表中
                 pkts.add(packet);
-                System.out.println("==== 已生成数据包:"+seqNum+"====");
 
                 // 增加序号
                 seqNum++;
             }
+            System.out.println("==== 已生成数据包个数:"+seqNum+"====");
         } catch (IOException e) {
             System.err.println("====读取文件失败!====");
         }

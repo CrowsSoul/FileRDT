@@ -7,10 +7,10 @@ import java.nio.ByteBuffer;
 
 public class GBNReceiver implements Receiver
 {
-    private final DatagramSocket socket;
-    private String fileName;
-    private int totalPkts;
-    private int expectedSeqNum;
+    protected final DatagramSocket socket;
+    protected String fileName;
+    protected int totalPkts;
+    protected int expectedSeqNum;
 
     public GBNReceiver(DatagramSocket socket)
     {
@@ -70,5 +70,11 @@ public class GBNReceiver implements Receiver
         {
             System.out.println("====ACK发送失败====");
         }
+    }
+
+    @Override
+    public boolean isFinished()
+    {
+        return true;
     }
 }

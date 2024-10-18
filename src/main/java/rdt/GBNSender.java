@@ -10,16 +10,16 @@ import java.util.Timer;
 
 public class GBNSender implements Sender
 {
-    private final DatagramSocket socket;
-    private String fileName;
-    private int totalPkts;
-    private final int windowSize = 5; // 窗口大小
-    private int base;
-    private int nextSeqNum;
+    protected final DatagramSocket socket;
+    protected String fileName;
+    protected int totalPkts;
+    protected final int windowSize = 5; // 窗口大小
+    protected int base;
+    protected int nextSeqNum;
     private Timer timer;
-    private final int TIMEOUT = 100; // 超时时间为0.1s
-    private final List<byte[]> dataList = new ArrayList<>();
-    private final Random random = new Random();
+    protected final int TIMEOUT = 100; // 超时时间为0.1s
+    protected List<byte[]> dataList;
+    protected final Random random = new Random();
 
     public GBNSender(DatagramSocket socket)
     {
@@ -33,6 +33,7 @@ public class GBNSender implements Sender
         this.totalPkts = pktNum;
         this.base = 0;
         this.nextSeqNum = 0;
+        this.dataList = new ArrayList<>();
 
         String message = "-createFile "+fileName+" "+pktNum;
         byte[] buffer = message.getBytes();
@@ -105,9 +106,10 @@ public class GBNSender implements Sender
      */
     public void reSend()
     {
-        if(base == (totalPkts+1))
+        if(base == (totalPkts+1)||base==nextSeqNum)
         {
             // 全部数据都已被确认，停止重传
+            // 或者发送的数据均已确认，停止重传
             stopTimer();
             return;
         }
@@ -125,6 +127,9 @@ public class GBNSender implements Sender
                 System.err.println("====数据发送失败====");
             }
         }
+        // 重启计时器
+        stopTimer();
+        startTimer();
     }
 
     private void startTimer()
