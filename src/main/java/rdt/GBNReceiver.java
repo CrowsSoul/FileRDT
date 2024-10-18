@@ -75,6 +75,11 @@ public class GBNReceiver implements Receiver
     @Override
     public boolean isFinished()
     {
-        return true;
+        if(expectedSeqNum==totalPkts+1)
+        {
+            System.out.println("====所有数据包均接收完毕！====");
+            return true;
+        }
+        return false;
     }
 }

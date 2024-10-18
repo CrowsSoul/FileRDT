@@ -95,7 +95,7 @@ public class FileServer implements Runnable
         String filePath = fileDir + filename;
         for (int i = 0; i <= pktNum; i++)
         {
-            fileData.add(new byte[1024]); // 初始化fileData列表
+            fileData.add(new byte[0]); // 初始化fileData列表
         }
         // 创建文件对象
         File file = new File(filePath);

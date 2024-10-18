@@ -13,7 +13,7 @@ public class GBNSender implements Sender
     protected final DatagramSocket socket;
     protected String fileName;
     protected int totalPkts;
-    protected final int windowSize = 5; // 窗口大小
+    protected int windowSize = 5; // 窗口大小
     protected int base;
     protected int nextSeqNum;
     private Timer timer;
