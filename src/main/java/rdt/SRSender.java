@@ -66,7 +66,7 @@ public class SRSender extends GBNSender
         if(base == seqNum && base <= totalPkts)
         {
             System.out.println("====发送方窗口移动!====");
-            System.out.printf("====发送方原窗口[%d,%d,%d]====\n",base,Math.min(nextSeqNum,totalPkts),Math.min(nextSeqNum+windowSize-1,totalPkts));
+            System.out.printf("====发送方原窗口[%d,%d,%d]====\n",base,Math.min(nextSeqNum,totalPkts),Math.min(base+windowSize-1,totalPkts));
             int end = base;
             // 主要保证end不要超过totalPkts
             while(end<=totalPkts && acks.get(end))
@@ -81,7 +81,7 @@ public class SRSender extends GBNSender
                 System.out.printf("====文件传输完成!====");
                 return;
             }
-            System.out.printf("====发送方现窗口[%d,%d,%d]====\n",base,nextSeqNum,Math.min(nextSeqNum+windowSize-1,totalPkts));
+            System.out.printf("====发送方现窗口[%d,%d,%d]====\n",base,nextSeqNum,Math.min(base+windowSize-1,totalPkts));
         }
 
     }
@@ -115,10 +115,10 @@ public class SRSender extends GBNSender
         byte[] data = dataList.get(seqNum);
         try
         {
-            socket.send(new DatagramPacket(data,data.length));
-            // 重发后，重新启动定时器
+            // 重新启动定时器
             stopTimer(seqNum);
             startTimer(seqNum);
+            socket.send(new DatagramPacket(data,data.length));
 
         } catch (IOException e)
         {
